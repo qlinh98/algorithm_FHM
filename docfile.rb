@@ -77,18 +77,17 @@ class FHM
           end
         end
       end
-      @util = 0
-      @rutil = 0
-      @sum_util_rutil = {}
+      util = 0
+      rutil = 0
+      sum_util_rutil = {}
       @arr_utility_list.each do |key, value|
         if key.has_key?(items)
-          @util += value.keys.inject(:+)
-          @rutil += value.values.inject(:+)
+          util += value.keys.inject(:+)
+          rutil += value.values.inject(:+)
         end
       end
-      @sum_util_rutil[@util] = @rutil
-      # utility list cua item co dang: {item => {util=>rutil}}
-      @arr_sum_utility_list[items] = @sum_util_rutil
+      sum_util_rutil[util] = rutil
+      @arr_sum_utility_list[items] = sum_util_rutil  # utility list cua item co dang: {item => {util=>rutil}}
     end
   end
 
@@ -126,97 +125,175 @@ class FHM
       # if @arr_sum_utility_list[item].keys[0] > @min_utility
       #   @arr_HUI[item] = @arr_sum_utility_list[item].keys[0]
       # end
-      algorithm_2_search("7")
-      # algorithm_2(item)
-
+      # algorithm_2_search("7")
+      algorithm_2(item, calculate_arr_extensions_p(item))
     end
   end
 
-  # def algorithm_2(p)
-  #   arr_extensions_p = []
-  #   @I.keys.each do |item|
-  #     if item != p
-  #       arr_extensions_p << item
-  #       @arr_sum_utility_list[item].keys[0]
+  def calculate_arr_extensions_p(p) # tạo mảng chứa các itemset px là phần mở rộng của itemset p
+    arr_extensions_p = []
+    @I.keys.each do |itemset_px|
+      if itemset_px != p
+        arr_extensions_p << itemset_px
+      end
+    end
+    arr_extensions_p
+  end
+
+  def algorithm_2(p, arr_extensions_p) # tach thanh ham tinh phan mo rong cua 1 item roi add vao duoi day
+    arr_extensions_p.each do |itemset_px| # duyêt các itemset px thuộc phần mở rộng của itemset p
+      binding.pry
+      if @arr_sum_utility_list[itemset_px].keys[0] >= @min_utility
+        @arr_HUI[itemset_px] = @arr_sum_utility_list[itemset_px].keys[0] # xuất ra itemset là HUI
+        # binding.pry
+      end
+      if @arr_sum_utility_list[itemset_px].keys[0] + @arr_sum_utility_list[itemset_px].values[0] >= @min_utility
+        arr_extensions_px = [] # mảng chứa các itemset thuộc phần mở rộng của itemset px
+        @I.keys.each do |itemset_py|
+          # duyêt các itemset py thuộc phần mở rộng của itemset px
+          if itemset_py != p && itemset_py != itemset_px && @arr_eucs[itemset_py => itemset_px] != nil && @arr_eucs[itemset_py => itemset_px] >= 0
+            itemset_px_py = {} # xay dung utility cho p, px, py
+            itemset_px_py[itemset_px] = itemset_py
+            arr_extensions_px << itemset_px_py
+            @utility_list_pxy = []
+            @utility_list_pxy << algorithm_3(p, itemset_px, itemset_py)
+            # binding.pry
+            # itemset_px_py[]
+            # binding.pry
+          end
+        end
+        algorithm_2(itemset_px, arr_extensions_px)
+      end
+    end
+    binding.pry # lỗi đệ quy
+  end
+
+  def utility_list_of_itemset(itemset) # tính danh sách hữu ích của một itemset
+    utility_list_of_itemset = {}
+    @arr_utility_list.each do |keys, values|
+      if keys.has_key?(itemset)
+        utility_list_of_itemset[keys] = values
+      end
+    end
+    utility_list_of_itemset
+  end
+
+  def findElementWithTID(item, td)
+  end
+
+  def algorithm_3(p, itemset_px, itemset_py)
+    utility_list_of_pxy = [] # mảng chứa các tuple của danh sách hữu ích của pxy
+    utility_list_of_itemset(itemset_px).each do |ex|
+      utility_list_of_itemset(itemset_py).each do |ey|
+        # binding.pry
+        if ex[0].values[0] == ey[0].values[0]
+          exy = {}
+          if utility_list_of_itemset(p) != nil
+            utility_list_of_itemset(p).each do |p|
+              if p[0].values[0] == ex[0].values[0]
+                hash_util_ruil = {}
+                hash_util_ruil[ex[1].keys[0] + ey[1].keys[0] - p[1].keys[0]] = ey[1].values[0]
+                exy[ex[0].values[0]] = hash_util_ruil
+              end
+            end
+          else
+            hash_util_ruil = {}
+            hash_util_ruil[ex[1].keys[0] + ey[1].keys[0]] = ey[1].values[0]
+            exy[ex[0].values[0]] = hash_util_ruil
+            # binding.pry
+          end
+          unless exy.empty?
+            utility_list_of_pxy << exy
+          end
+        end
+      end
+    end
+    utility_list_of_pxy
+    # utility_list_of_pxy = []
+    # @arr_utility_list.keys.each do |itemset|
+    #   # duyêt các bộ trong utility list của itemset px
+    #   if itemset.has_key?(itemset_px) &&
+
+    #      binding.pry
+    #   end
+    # end
+    # binding.pry
+  end
+
+  # def calculate_util_in_arr_td(p, arr_td) # tính tổng các ituil của item trong các giao dịch cho trước
+  #   sum = 0
+  #   arr_td.each do |td|
+  #     sum += @arr_utility_list[p => td].keys[0]
+  #   end
+  #   sum
+  # end
+
+  # def calculate_util_rutil_in_arr_td(p, arr_td) # tính tổng các ituil của item trong các giao dịch cho trước
+  #   sum = 0
+  #   arr_td.each do |td|
+  #     sum += @arr_tu[td - 1].to_i
+  #   end
+  #   sum
+  # end
+
+  # def extensions_arr_td(p)
+  #   hash_extensions_arr_td = {}
+  #   @arr_items.each_with_index do |arr_item, index|
+  #     if arr_item.include?(p)
+  #       arr_item.each do |item|
+  #         if (item != p) && @I.has_key?(item)
+  #           extensions_p << item
+  #           @arr_utility_list[p => index + 1].keys[0]
+  #         end
+  #         if item == p
+  #           arr_td << index + 1
+  #         end
+  #       end
+  #       hash_extensions_arr_td[]
+  #     end
+  #   end
+  # end
+
+  # def algorithm_2_search(p)
+  #   extensions_p = [] # mảng chứa các item mở rộng của p
+  #   arr_td = [] # mảng chứa các giao dịch (chứa item đang xét)
+  #   @arr_items.each_with_index do |arr_item, index|
+  #     if arr_item.include?(p)
+  #       arr_item.each do |item|
+  #         if (item != p) && @I.has_key?(item)
+  #           extensions_p << item
+  #           @arr_utility_list[p => index + 1].keys[0]
+  #         end
+  #         if item == p
+  #           arr_td << index + 1
+  #         end
+  #       end
   #     end
   #   end
   #   binding.pry
+  #   extensions_p.uniq.each do |item|
+  #     arr_td_item = []
+  #     arr_td.each do |td|
+  #       if @arr_utility_list.has_key?(item => td) && @arr_utility_list.has_key?(p => td)
+  #         arr_td_item << td # mảng chứa các giao dịch của itemset( item và p)
+  #       end
+  #     end
+  #     if calculate_util_in_arr_td(item, arr_td_item) >= @min_utility # tổng util của item (trong cac giao dich co chua item vs p) >= min_utility
+  #       @arr_HUI[item] = calculate_util_in_arr_td(item, arr_td_item)
+  #     end
+  #     hash_p_item = {}
+  #     if calculate_util_rutil_in_arr_td(item, arr_td_item) >= @min_utility # tổng util và rutil của item (trong các giao dịch có chứa item và p) >= min_utility
+  #       # hash_p_item[item] = p
+  #       # @arr_HUI[hash_p_item] = calculate_util_rutil_in_arr_td(item, arr_td_item)
+  #       extensions_px = {}
+  #     end
+  #     binding.pry
+  #     # if calculate_util_rutil_in_arr_td(item, arr_td_item) + calculate_util_rutil_in_arr_td(p, arr_td_item) >= @min_utility
+  #     #   extension_of_px
+  #     # end
+  #   end
+  #   # binding.pry
   # end
-
-  def calculate_util_in_arr_td(p, arr_td) # tính tổng các ituil của item trong các giao dịch cho trước
-    sum = 0
-    arr_td.each do |td|
-      sum += @arr_utility_list[p => td].keys[0]
-    end
-    sum
-  end
-
-  def calculate_util_rutil_in_arr_td(p, arr_td) # tính tổng các ituil của item trong các giao dịch cho trước
-    sum = 0
-    arr_td.each do |td|
-      sum += @arr_tu[td - 1].to_i
-    end
-    sum
-  end
-
-  def extensions_arr_td(p)
-    hash_extensions_arr_td = {}
-    @arr_items.each_with_index do |arr_item, index|
-      if arr_item.include?(p)
-        arr_item.each do |item|
-          if (item != p) && @I.has_key?(item)
-            extensions_p << item
-            @arr_utility_list[p => index + 1].keys[0]
-          end
-          if item == p
-            arr_td << index + 1
-          end
-        end
-        hash_extensions_arr_td[]
-      end
-    end
-  end
-
-  def algorithm_2_search(p)
-    extensions_p = [] # mảng chứa các item mở rộng của p
-    arr_td = [] # mảng chứa các giao dịch (chứa item đang xét)
-    @arr_items.each_with_index do |arr_item, index|
-      if arr_item.include?(p)
-        arr_item.each do |item|
-          if (item != p) && @I.has_key?(item)
-            extensions_p << item
-            @arr_utility_list[p => index + 1].keys[0]
-          end
-          if item == p
-            arr_td << index + 1
-          end
-        end
-      end
-    end
-    binding.pry
-    extensions_p.uniq.each do |item|
-      arr_td_item = []
-      arr_td.each do |td|
-        if @arr_utility_list.has_key?(item => td) && @arr_utility_list.has_key?(p => td)
-          arr_td_item << td # mảng chứa các giao dịch của itemset( item và p)
-        end
-      end
-      if calculate_util_in_arr_td(item, arr_td_item) >= @min_utility # tổng util của item (trong cac giao dich co chua item vs p) >= min_utility
-        @arr_HUI[item] = calculate_util_in_arr_td(item, arr_td_item)
-      end
-      hash_p_item = {}
-      if calculate_util_rutil_in_arr_td(item, arr_td_item) >= @min_utility # tổng util và rutil của item (trong các giao dịch có chứa item và p) >= min_utility
-        # hash_p_item[item] = p
-        # @arr_HUI[hash_p_item] = calculate_util_rutil_in_arr_td(item, arr_td_item)
-        extensions_px = {}
-      end
-      binding.pry
-      # if calculate_util_rutil_in_arr_td(item, arr_td_item) + calculate_util_rutil_in_arr_td(p, arr_td_item) >= @min_utility
-      #   extension_of_px
-      # end
-    end
-    # binding.pry
-  end
 end
 
 main = FHM.new
