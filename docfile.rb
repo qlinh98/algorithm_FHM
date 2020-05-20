@@ -127,6 +127,10 @@ class FHM
       # end
       # algorithm_2_search("7")
       algorithm_2(item, calculate_arr_extensions_p(item))
+
+      # calculate_sum_utility_hui(["7"])
+      # calculate_sum_utility_hui(["1","2","3","4","5","6"])
+      # binding.pry
     end
   end
 
@@ -137,38 +141,122 @@ class FHM
         arr_extensions_p << itemset_px
       end
     end
+    # binding.pry
     arr_extensions_p
   end
 
-  def algorithm_2(p, arr_extensions_p) # tach thanh ham tinh phan mo rong cua 1 item roi add vao duoi day
+  def calculate_sum_utility_hui(p)
+    # binding.pry
+    if p.length == 1
+      return @arr_sum_utility_list[p[0]].keys[0]
+    else
+      hash_utility = {}
+      p.each do |item|
+        @arr_utility_list.each do |key, value| # value == @arr_utility_list[item => key.values[0]]
+          if key.has_key?(item)
+            hash_utility[key] = value
+          end
+        end
+      end
+      # hash_utility_simple = {}
+      hash_result = []
+      hash_utility.each do |key, value|
+        td = key.values[0]
+        hash_utility_simple = {}
+        p.each do |item|
+          if hash_utility[item => td] != nil
+            hash_utility_simple[item => td] = hash_utility[item => td]
+          end
+        end
+        if hash_utility_simple.length == p.length
+          hash_result << hash_utility_simple
+          # return hash_result
+          # binding.pry
+        end
+      end
+      # hash
+      # binding.pry
+      sum_util = 0
+      hash_result.uniq.each do |arr_hash|
+        arr_hash.each do |tuple|
+          sum_util += tuple[1].keys[0]
+        end
+      end
+      # binding.pry
+    end
+  end
+
+  def algorithm_2(p, arr_extensions_p)
+    
     arr_extensions_p.each do |itemset_px| # duyêt các itemset px thuộc phần mở rộng của itemset p
-      binding.pry
-      if @arr_sum_utility_list[itemset_px].keys[0] >= @min_utility
+      # binding.pry
+      if @arr_sum_utility_list[itemset_px].keys[0] >= @min_utility # điều kiên sum util trong danh sách hữu ích của px
         @arr_HUI[itemset_px] = @arr_sum_utility_list[itemset_px].keys[0] # xuất ra itemset là HUI
-        # binding.pry
       end
       if @arr_sum_utility_list[itemset_px].keys[0] + @arr_sum_utility_list[itemset_px].values[0] >= @min_utility
         arr_extensions_px = [] # mảng chứa các itemset thuộc phần mở rộng của itemset px
         @I.keys.each do |itemset_py|
           # duyêt các itemset py thuộc phần mở rộng của itemset px
+          # điều kiện itemset py và cấu trúc eucs của pxy(x,y,c) sao cho c >= @min_utility
           if itemset_py != p && itemset_py != itemset_px && @arr_eucs[itemset_py => itemset_px] != nil && @arr_eucs[itemset_py => itemset_px] >= 0
             itemset_px_py = {} # xay dung utility cho p, px, py
             itemset_px_py[itemset_px] = itemset_py
             arr_extensions_px << itemset_px_py
+
+            # itemset_px_py = []
+            # itemset_px_py << itemset_px
+            # itemset_px_py << itemset_py
+
+            # arr_extensions_px << itemset_px
+            # arr_extensions_px << itemset_py
             @utility_list_pxy = []
-            @utility_list_pxy << algorithm_3(p, itemset_px, itemset_py)
-            # binding.pry
+            binding.pry
+            @utility_list_pxy << algorithm_3("3", itemset_px, itemset_py)
             # itemset_px_py[]
             # binding.pry
           end
         end
-        algorithm_2(itemset_px, arr_extensions_px)
+        # binding.pry
+        algorithm_2(itemset_px, arr_extensions_px.uniq)
       end
     end
     binding.pry # lỗi đệ quy
   end
+  # def algorithm_2(p, arr_extensions_p)
+  #   arr_extensions_p.each do |itemset_px| # duyêt các itemset px thuộc phần mở rộng của itemset p
+  #     # binding.pry
+  #     if @arr_sum_utility_list[itemset_px].keys[0] >= @min_utility # điều kiên sum util trong danh sách hữu ích của px
+  #       @arr_HUI[itemset_px] = @arr_sum_utility_list[itemset_px].keys[0] # xuất ra itemset là HUI
+  #     end
+  #     if @arr_sum_utility_list[itemset_px].keys[0] + @arr_sum_utility_list[itemset_px].values[0] >= @min_utility
+  #       arr_extensions_px = [] # mảng chứa các itemset thuộc phần mở rộng của itemset px
+  #       @I.keys.each do |itemset_py|
+  #         # duyêt các itemset py thuộc phần mở rộng của itemset px
+  #         # điều kiện itemset py và cấu trúc eucs của pxy(x,y,c) sao cho c >= @min_utility
+  #         if itemset_py != p && itemset_py != itemset_px && @arr_eucs[itemset_py => itemset_px] != nil && @arr_eucs[itemset_py => itemset_px] >= 0
+  #           itemset_px_py = {} # xay dung utility cho p, px, py
+  #           itemset_px_py[itemset_px] = itemset_py
+  #           arr_extensions_px << itemset_px_py
+  #           # itemset_px_py = []
+  #           # itemset_px_py << itemset_px
+  #           # itemset_px_py << itemset_py
+  #           # arr_extensions_px << itemset_px
+  #           # arr_extensions_px << itemset_py
+  #           @utility_list_pxy = []
+  #           binding.pry
+  #           @utility_list_pxy << algorithm_3("3", itemset_px, itemset_py)
+  #           # itemset_px_py[]
+  #           # binding.pry
+  #         end
+  #       end
+  #       # binding.pry
+  #       algorithm_2(itemset_px, arr_extensions_px.uniq)
+  #     end
+  #   end
+  #   binding.pry # lỗi đệ quy
+  # end
 
-  def utility_list_of_itemset(itemset) # tính danh sách hữu ích của một itemset
+  def utility_list_of_itemset(itemset) # tính danh sách hữu ích của một item
     utility_list_of_itemset = {}
     @arr_utility_list.each do |keys, values|
       if keys.has_key?(itemset)
@@ -183,41 +271,32 @@ class FHM
 
   def algorithm_3(p, itemset_px, itemset_py)
     utility_list_of_pxy = [] # mảng chứa các tuple của danh sách hữu ích của pxy
-    utility_list_of_itemset(itemset_px).each do |ex|
-      utility_list_of_itemset(itemset_py).each do |ey|
+    utility_list_of_itemset("2").each do |ex| # duyệt các bộ ex thuộc danh sách hữu ích của itemset px
+      utility_list_of_itemset("4").each do |ey| # duyệt các bộ ey thuộc danh sách hữu ích của itemset py
         # binding.pry
-        if ex[0].values[0] == ey[0].values[0]
-          exy = {}
-          if utility_list_of_itemset(p) != nil
+        if ex[0].values[0] == ey[0].values[0] # điều kiện ex.tid = ey.tid
+          exy = {} # khai báo hash lưu giá trị có dạng {tid => {util=>rutil}}
+          if utility_list_of_itemset(p) != nil # điều kiên danh sách hữu ích của itemset p khác rỗng
             utility_list_of_itemset(p).each do |p|
-              if p[0].values[0] == ex[0].values[0]
-                hash_util_ruil = {}
+              if p[0].values[0] == ex[0].values[0] # duyêt các bộ e trong danh sách hữu ích của itemset p
+                hash_util_ruil = {} # khai báo hash lưu giá trị có dạng {util=>rutil}
                 hash_util_ruil[ex[1].keys[0] + ey[1].keys[0] - p[1].keys[0]] = ey[1].values[0]
                 exy[ex[0].values[0]] = hash_util_ruil
               end
             end
-          else
+          else # điều kiên danh sách hữu ích của p là rỗng
             hash_util_ruil = {}
             hash_util_ruil[ex[1].keys[0] + ey[1].keys[0]] = ey[1].values[0]
             exy[ex[0].values[0]] = hash_util_ruil
-            # binding.pry
           end
-          unless exy.empty?
+          unless exy.empty? # loại bõ nhưng phần tử rỗng ra khỏi danh sách hữu ích
             utility_list_of_pxy << exy
           end
         end
       end
     end
     utility_list_of_pxy
-    # utility_list_of_pxy = []
-    # @arr_utility_list.keys.each do |itemset|
-    #   # duyêt các bộ trong utility list của itemset px
-    #   if itemset.has_key?(itemset_px) &&
-
-    #      binding.pry
-    #   end
-    # end
-    # binding.pry
+    binding.pry
   end
 
   # def calculate_util_in_arr_td(p, arr_td) # tính tổng các ituil của item trong các giao dịch cho trước
