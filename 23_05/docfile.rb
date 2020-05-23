@@ -130,22 +130,13 @@ class FHM
       # end
       # algorithm_2_search("7")
       # binding.pry
-      # item = "3"
+      item = "3"
       # binding.pry
-
+      hash_itemset_ULs = {}
+      hash_itemset_ULs[calculate_arr_extensions_p(item)[index]] = calculate_utility_list_itemset(calculate_arr_extensions_p(item)[index])
       arr_ULs = []
-      # hash_itemset_ULs = {}
-      # hash_itemset_ULs[calculate_arr_extensions_p(item)[index]] = calculate_utility_list_itemset(calculate_arr_extensions_p(item)[index])
-      # arr_ULs << hash_itemset_ULs # [{["3", "6"]=>[{{"3"=>1}=>{1=>29}, {"6"=>1}=>{5=>25}}]}]
+      arr_ULs << hash_itemset_ULs
       # binding.pry
-      calculate_arr_extensions_p(item).each_with_index do |itemset_ULs, index_ULs|
-        hash_itemset_ULs = {}
-        hash_itemset_ULs[itemset_ULs] = calculate_utility_list_itemset(itemset_ULs)
-        arr_ULs << hash_itemset_ULs
-        # binding.pry
-      end
-      # binding.pry
-      # if !calculate_utility_list_itemset(calculate_arr_extensions_p(item)[index]).empty?
       algorithm_2([item], calculate_arr_extensions_p(item), arr_ULs)
       # algorithm_2([item], calculate_arr_extensions_p(item), [calculate_utility_list_itemset(calculate_arr_extensions_p(item)[index])])
 
@@ -153,17 +144,15 @@ class FHM
       # algorithm_2(["6", "4"], [["6", "4", "2"], ["6", "4", "1"], ["6", "4", "5"]],[[{1=>{21=>20}}], [{1=>{16=>25}}], [{1=>{14=>27}}]])
       # algorithm_2(["6", "4", "2"], [["6", "4", "2", "1"], ["6", "4", "2", "5"]], [[{ 1 => { 26 => 25 } }], [{ 1 => { 24 => 27 } }]])
       # algorithm_2(["6", "4", "2", "1"], [["6", "4", "2", "1", "5"]] , [[{1=>{29=>27}}]])
-      # binding.pry
+      binding.pry
       # dem += 1
       # calculate_sum_utility_list(["2", "4"])
       # calculate_sum_utility_list(["7"])
       # twu (["4", "7"])
       # binding.pry
     end
-    # binding.pry
-    # end
+    arr_hui
     binding.pry
-    # arr_hui
   end
 
   def algorithm_2(p, arr_extensions_p, arr_ULs_X)
@@ -236,7 +225,7 @@ class FHM
       end
       # binding.pry
     end
-    # binding.pry # lỗi đệ quy
+    binding.pry # lỗi đệ quy
     @arr_HUI
   end
 
@@ -290,10 +279,8 @@ class FHM
   def calculate_arr_extensions_p(p) # tạo mảng chứa các itemset px là phần mở rộng của itemset p
     arr_extensions_p = []
     @I.keys.each do |itemset_px|
-      # arr_ext_px = []
       if itemset_px != p
-        arr_extensions_p << [p, itemset_px] # đóng ngoặc vuông lai :))
-        # binding.pry
+        arr_extensions_p << [itemset_px] # đóng ngoặc vuông lai :))
       end
     end
     # binding.pry
@@ -302,62 +289,57 @@ class FHM
 
   def calculate_utility_list_itemset(p) # danh sách hữu ích của 1 itemset
     # binding.pry
-    result = []
-    if p.nil?
-      return result
-    else
-      if p.length == 1 # nếu itemset chỉ có 1 item thì truy xuất trong mảng đã tính (chứa tất cả các item vs tổng util và rutil)
-        # return @arr_sum_utility_list[p[0]].keys[0]
-        hash_result = []
-        p.each do |item|
-          @arr_utility_list.each do |key, value|
-            hash_utility = {} # tạo hash chứa tẩt cả các tuple của từng item trong itemset
-            if key.has_key?(item)
-              hash_utility[key] = value
-              hash_result << hash_utility
-            end
+    if p.length == 1 # nếu itemset chỉ có 1 item thì truy xuất trong mảng đã tính (chứa tất cả các item vs tổng util và rutil)
+      # return @arr_sum_utility_list[p[0]].keys[0]
+      hash_result = []
+      p.each do |item|
+        @arr_utility_list.each do |key, value|
+          hash_utility = {} # tạo hash chứa tẩt cả các tuple của từng item trong itemset
+          if key.has_key?(item)
+            hash_utility[key] = value
+            hash_result << hash_utility
           end
         end
-        return hash_result
-      else
-        hash_utility = {} # tạo hash chứa tẩt cả các tuple của từng item trong itemset
-        p.each do |item|
-          @arr_utility_list.each do |key, value|
-            if key.has_key?(item)
-              hash_utility[key] = value
-            end
-          end
-        end
-        # hash_utility_simple = {}
-        hash_result = [] # tao mảng chứa các tuple trong dánh sách hữu ích itemset
-        hash_utility.each do |key, value|
-          td = key.values[0] # gán td = giao dịch đầu tiên của item tồn tại trong các tuple của từng item trong itemset
-          hash_utility_simple = {}
-          p.each do |item|
-            if hash_utility[item => td] != nil # điều kiện item đó có tồn tại trong giao dich này không.
-              hash_utility_simple[item => td] = hash_utility[item => td]
-            end
-          end
-          if hash_utility_simple.length == p.length # nếu số item trong itemset bằng số item trong mảng p thì...
-            hash_result << hash_utility_simple
-            # return hash_result
-            # binding.pry
-          end
-        end
-        # hash
-        # binding.pry
-
-        # sum_util = 0 # khai báo tổng util của itemset
-        # hash_result.uniq.each do |arr_hash|
-        #   arr_hash.each do |tuple|
-        #     sum_util += tuple[1].keys[0]
-        #   end
-        # end
-        # binding.pry
       end
+      return hash_result
+    else
+      hash_utility = {} # tạo hash chứa tẩt cả các tuple của từng item trong itemset
+      p.each do |item|
+        @arr_utility_list.each do |key, value|
+          if key.has_key?(item)
+            hash_utility[key] = value
+          end
+        end
+      end
+      # hash_utility_simple = {}
+      hash_result = [] # tao mảng chứa các tuple trong dánh sách hữu ích itemset
+      hash_utility.each do |key, value|
+        td = key.values[0] # gán td = giao dịch đầu tiên của item tồn tại trong các tuple của từng item trong itemset
+        hash_utility_simple = {}
+        p.each do |item|
+          if hash_utility[item => td] != nil # điều kiện item đó có tồn tại trong giao dich này không.
+            hash_utility_simple[item => td] = hash_utility[item => td]
+          end
+        end
+        if hash_utility_simple.length == p.length # nếu số item trong itemset bằng số item trong mảng p thì...
+          hash_result << hash_utility_simple
+          # return hash_result
+          # binding.pry
+        end
+      end
+      # hash
       # binding.pry
-      hash_result.uniq
+
+      # sum_util = 0 # khai báo tổng util của itemset
+      # hash_result.uniq.each do |arr_hash|
+      #   arr_hash.each do |tuple|
+      #     sum_util += tuple[1].keys[0]
+      #   end
+      # end
+      # binding.pry
     end
+    # binding.pry
+    hash_result.uniq
   end
 
   def sum_util(hash) # bị lỗi sum_util (hash ko xác định là gì,,,,)
